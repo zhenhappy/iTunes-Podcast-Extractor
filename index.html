@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iTunes Podcast Extractor</title>
+</head>
+<body>
+<h2>iTunes Podcast Extractor: find Podcast rss feed by url or ID</h2>
+url: https://podcasts.apple.com/cn/podcast/故事-fm/id1256399960
+<br>id: 1256399960
+<br>id2: id1256399960
+<br>
+<br>
+<form action="">Enter Podcast ID or URL:
+  <input type="text" id="podID" name="podID" size="50" value="https://podcasts.apple.com/cn/podcast/故事-fm/id1256399960">
+  <input type="submit" value="Submit">
+</form>
+<h3 id="feedUrl"></h3>
+<div class="result" style="display: inline-block; text-align: center;">
+  <img id="artwork" src=""/>
+  <h3 id="trackName"></h3>
+</div>
+<script src="js/jquery.min.js"></script>
+<script>
+  $(document).ready(function () {
+    $('form').submit(function (e) {
+      e.preventDefault()
+      var url = $('#podID').val()
+      getrss(url)
+    })
+
+    function getrss (url) {
+      $('#feedUrl, #artwork').html('')
+
+      var match = url.match(/id(\d+)/)
+      if (match) var podID = match[1]
+      else var podID = url.match(/\d+/) // 123456
+
+      if (!podID) {
+        $('#feedUrl').text('No Podcast ID found')
+        return false
+      }
+
+      $.ajax({
+        url: 'https://itunes.apple.com/lookup',
+        data: {
+          id: parseInt(podID),
+          entity: 'podcast'
+        },
+        type: 'GET',
+        dataType: 'jsonp',
+        success: function (data) {
+          console.log(data)
+          var results = data.results
+          var feedUrl = results[0]['feedUrl']
+          var artwork = results[0]['artworkUrl100']
+          var trackName = results[0]['trackName']
+          $('#feedUrl').text(feedUrl)
+          $('#artwork').attr('src', artwork)
+          $('#trackName').text(trackName)
+        }
+      })
+    }
+  })
+</script>
+</body>
+</html>
